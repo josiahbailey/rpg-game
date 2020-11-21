@@ -1,10 +1,10 @@
 import React from 'react'
-import Field from './components/Field'
+import Grid from './components/Grid/Grid'
 
 function App() {
     return (
         <div className="App">
-            <Field />
+            <Grid />
         </div>
     );
 }
