@@ -87,6 +87,12 @@ const test = [
 ]
 
 const Grid = () => {
+    const [player, setPlayer] = useState({
+        name: "player",
+        position: [0, 0],
+    })
+
+
     const createBlock = (id = 0, position = 0, items = null, entity = null, background = null) => {
         return {
             id: id,
@@ -100,40 +106,37 @@ const Grid = () => {
     const createGrid = (w, h) => {
         const newGrid = {}
         // const initialLocation = [(h / 2 * w) + (w / 2), h / 2]
-        const initialLocation = (h / 2 * w) + (w / 2)
+        const initialLocationId = (h / 2 * w) + (w / 2)
+        const initialLocation = [w / 2, h / 2]
 
         for (let i = 0; i < h; i++) {
-            // newGrid[i] = new Array(w).fill(createBlock())
             newGrid[i] = new Array(w)
             for (let x = 0; x < w; x++) {
-                // console.log(x)
                 newGrid[i][x] = createBlock((i * 100) + x, x)
 
-                if (newGrid[i][x].id === initialLocation) {
-                    newGrid[i][x].entity = "player"
-                }
+                // if (newGrid[i][x].id === initialLocationId) {
+                //     newGrid[i][x].entity = player
+                // }
             }
         }
 
-        // console.log(newGrid)
-        return newGrid
+        return [newGrid, initialLocation]
     }
 
     const width = 100
     const height = 100
-    const grid = createGrid(width, height)
+    const [grid, initialLocation] = createGrid(width, height)
     const [display, setDisplay] = useState([])
-    const [playerPointer, setPointer] = useState([width / 2, height / 2])
-    const [player, setPlayer] = useState({
-        name: "player",
-        position: null,
-    })
 
-    const updateGrid = () => {
-        const startHeight = playerPointer[1] + 4
-        const endHeight = playerPointer[1] - 5
-        const startWidth = playerPointer[0] - 4
-        const endWidth = playerPointer[0] + 5
+    const initializeDisplay = () => {
+        // const startHeight = player.position[1] + 4
+        // const endHeight = player.position[1] - 5
+        // const startWidth = player.position[0] - 4
+        // const endWidth = player.position[0] + 5
+        const startHeight = initialLocation[1] + 4
+        const endHeight = initialLocation[1] - 5
+        const startWidth = initialLocation[0] - 4
+        const endWidth = initialLocation[0] + 5
         let updatedDisplay = []
 
         for (let i = startHeight; i > endHeight; i--) {
@@ -142,12 +145,74 @@ const Grid = () => {
         }
 
         setDisplay(updatedDisplay)
+        console.log(grid)
+        setPlayer({
+            ...player,
+            position: initialLocation
+        })
+    }
+
+    const updateGrid = (direction) => {
+        const startingPositions = {
+            "n": {
+                startHeight: player.position[1] + 5,
+                endHeight: player.position[1] - 4,
+                startWidth: player.position[0] - 4,
+                endWidth: player.position[0] + 5
+            },
+            "s": {
+                startHeight: player.position[1] + 3,
+                endHeight: player.position[1] - 6,
+                startWidth: player.position[0] - 4,
+                endWidth: player.position[0] + 5
+            },
+            "e": {
+                startHeight: player.position[1] + 4,
+                endHeight: player.position[1] - 5,
+                startWidth: player.position[0] - 3,
+                endWidth: player.position[0] + 6
+            },
+            "w": {
+                startHeight: player.position[1] + 4,
+                endHeight: player.position[1] - 5,
+                startWidth: player.position[0] - 5,
+                endWidth: player.position[0] + 4
+            },
+        }
+        let updatedDisplay = []
+        let position = startingPositions[direction]
+
+        for (let i = position.startHeight; i > position.endHeight; i--) {
+            const row = grid[i].slice(position.startWidth, position.endWidth)
+            updatedDisplay = updatedDisplay.concat(row)
+        }
+
+        setDisplay(updatedDisplay)
         console.log(display)
     }
 
     useEffect(() => {
-        updateGrid()
+        initializeDisplay()
     }, [])
+
+    const changePlayerPosition = (direction) => {
+        const updatedPositions = {
+            "n": [player.position[0], player.position[1] + 1],
+            "s": [player.position[0], player.position[1] - 1],
+            "e": [player.position[0] + 1, player.position[1]],
+            "w": [player.position[0] - 1, player.position[1]]
+        }
+
+        grid[player.position[0]][player.position[1]].entity = null
+        grid[updatedPositions[direction][1]][updatedPositions[direction][0]].entity = player
+
+        setPlayer({
+            ...player,
+            position: updatedPositions[direction]
+        })
+
+        updateGrid(direction)
+    }
 
 
     return (
@@ -159,12 +224,12 @@ const Grid = () => {
             </div>
 
             <div className='Menu'>
-                <button>Up</button>
+                <button onClick={() => changePlayerPosition("n")}>Up</button>
                 <div>
-                    <button>Left</button>
-                    <button>Right</button>
+                    <button onClick={() => changePlayerPosition("w")}>Left</button>
+                    <button onClick={() => changePlayerPosition("e")}>Right</button>
                 </div>
-                <button>Down</button>
+                <button onClick={() => changePlayerPosition("s")}>Down</button>
             </div>
         </div>
     )

@@ -114,4 +114,6 @@ video {
 }
 .Menu {
   margin: 0 auto;
+  width: 100px;
+  background-color: black;
 }

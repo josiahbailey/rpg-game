@@ -8,7 +8,7 @@ const Block = ({ block }) => {
         <div className='Block'>
             <p>{id}</p>
             <p>{position}</p>
-            <p>{entity}</p>
+            <p>{entity !== null ? entity.name : ""}</p>
         </div>
     )
 }
