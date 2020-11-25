@@ -112,6 +112,9 @@ video {
 .Block p {
   font-size: 10px;
 }
+.Barrier {
+  background-color: black;
+}
 .Menu {
   margin: 0 auto;
   width: 100px;

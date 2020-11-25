@@ -87,13 +87,7 @@ const test = [
 ]
 
 const Grid = () => {
-    const [player, setPlayer] = useState({
-        name: "player",
-        position: [0, 0],
-    })
-
-
-    const createBlock = (id = 0, position = 0, items = null, entity = null, background = null) => {
+    const createBlock = (id = -1, position = null, items = null, entity = null, background = null) => {
         return {
             id: id,
             position: position,
@@ -107,32 +101,29 @@ const Grid = () => {
         const newGrid = {}
         // const initialLocation = [(h / 2 * w) + (w / 2), h / 2]
         const initialLocationId = (h / 2 * w) + (w / 2)
-        const initialLocation = [w / 2, h / 2]
+        // const initialLocation = [w / 2, h / 2]
+        const initialLocation = [94, 94]
 
         for (let i = 0; i < h; i++) {
             newGrid[i] = new Array(w)
             for (let x = 0; x < w; x++) {
                 newGrid[i][x] = createBlock((i * 100) + x, x)
-
-                // if (newGrid[i][x].id === initialLocationId) {
-                //     newGrid[i][x].entity = player
-                // }
             }
         }
-
         return [newGrid, initialLocation]
     }
 
     const width = 100
     const height = 100
+    const displaySize = 9
     const [grid, initialLocation] = createGrid(width, height)
     const [display, setDisplay] = useState([])
+    const [player, setPlayer] = useState({
+        name: "player",
+        position: initialLocation,
+    })
 
     const initializeDisplay = () => {
-        // const startHeight = player.position[1] + 4
-        // const endHeight = player.position[1] - 5
-        // const startWidth = player.position[0] - 4
-        // const endWidth = player.position[0] + 5
         const startHeight = initialLocation[1] + 4
         const endHeight = initialLocation[1] - 5
         const startWidth = initialLocation[0] - 4
@@ -145,45 +136,157 @@ const Grid = () => {
         }
 
         setDisplay(updatedDisplay)
-        console.log(grid)
-        setPlayer({
-            ...player,
-            position: initialLocation
-        })
+    }
+
+    const getDisplayPosition = (direction) => {
+        const [x, y] = player.position
+        let newPosition
+
+        const normalPositions = {
+            "n": {
+                startHeight: y + 5,
+                endHeight: y - 4,
+                startWidth: x - 4,
+                endWidth: x + 5
+            },
+            "s": {
+                startHeight: y + 3,
+                endHeight: y - 6,
+                startWidth: x - 4,
+                endWidth: x + 5
+            },
+            "e": {
+                startHeight: y + 4,
+                endHeight: y - 5,
+                startWidth: x - 3,
+                endWidth: x + 6
+            },
+            "w": {
+                startHeight: y + 4,
+                endHeight: y - 5,
+                startWidth: x - 5,
+                endWidth: x + 4
+            },
+        }
+
+        return normalPositions[direction]
+
+        // const fixedPositions = {
+        //     "n": {
+        //         startHeight: 99,
+        //         endHeight: 90,
+        //         startWidth: direction === "e" ? x - 3 : direction === "w" ? x - 5 : x - 4,
+        //         endWidth: direction === "e" ? x + 6 : direction === "w" ? x + 4 : x + 5
+        //     },
+        //     "ne": {
+        //         startHeight: 99,
+        //         endHeight: 90,
+        //         startWidth: 91,
+        //         endWidth: 100
+        //     },
+        //     "nw": {
+        //         startHeight: 99,
+        //         endHeight: 90,
+        //         startWidth: 0,
+        //         endWidth: 9
+        //     },
+        //     "s": {
+        //         startHeight: 9,
+        //         endHeight: 0,
+        //         startWidth: direction === "e" ? x - 3 : direction === "w" ? x - 5 : x - 4,
+        //         endWidth: direction === "e" ? x + 6 : direction === "w" ? x + 4 : x + 5
+        //     },
+        //     "se": {
+        //         startHeight: 9,
+        //         endHeight: 0,
+        //         startWidth: 91,
+        //         endWidth: 100
+        //     },
+        //     "sw": {
+        //         startHeight: 9,
+        //         endHeight: 0,
+        //         startWidth: 0,
+        //         endWidth: 9
+        //     },
+        //     "e": {
+        //         startHeight: direction === "n" ? y + 5 : direction === "s" ? y + 3 : y + 4,
+        //         endHeight: direction === "n" ? y - 4 : direction === "s" ? y - 6 : y - 5,
+        //         startWidth: 91,
+        //         endWidth: 100
+        //     },
+        //     "w": {
+        //         startHeight: direction === "n" ? y + 5 : direction === "s" ? y + 3 : y + 4,
+        //         endHeight: direction === "n" ? y - 4 : direction === "s" ? y - 6 : y - 5,
+        //         startWidth: 0,
+        //         endWidth: 9
+        //     },
+        // }
+
+        // if (y > 94) {
+        //     if (y === 95 && direction === "s") {
+        //         console.log("Normal Position")
+        //         newPosition = normalPositions[direction]
+        //     } else if (x > 94) {
+        //         console.log("ne")
+        //         newPosition = fixedPositions["ne"]
+        //     } else if (x < 5) {
+        //         console.log("nw")
+        //         newPosition = fixedPositions["nw"]
+        //     } else {
+        //         console.log("n")
+        //         newPosition = fixedPositions["n"]
+        //     }
+        // } else if (y < 6) {
+        //     if (y === 5 && direction === "n") {
+        //         console.log("Normal Position")
+        //         newPosition = normalPositions[direction]
+        //     } else if (x > 94) {
+        //         console.log("se")
+        //         newPosition = fixedPositions["se"]
+        //     } else if (x < 5) {
+        //         console.log("sw")
+        //         newPosition = fixedPositions["sw"]
+        //     } else {
+        //         console.log("s")
+        //         newPosition = fixedPositions["s"]
+        //     }
+        // } else if (x > 94) {
+        //     if (x === 95 && direction === "w") {
+        //         console.log("Normal Position")
+        //         newPosition = normalPositions[direction]
+        //     } else {
+        //         console.log("e")
+        //         newPosition = fixedPositions["e"]
+        //     }
+        // } else if (x < 5) {
+        //     if (x === 4 && direction === "e") {
+        //         console.log("Normal Position")
+        //         newPosition = normalPositions[direction]
+        //     } else {
+        //         console.log("w")
+        //         newPosition = fixedPositions["w"]
+        //     }
+        // } else {
+        //     console.log("Normal Position")
+        //     newPosition = normalPositions[direction]
+        // }
+
+        // return newPosition
     }
 
     const updateGrid = (direction) => {
-        const startingPositions = {
-            "n": {
-                startHeight: player.position[1] + 5,
-                endHeight: player.position[1] - 4,
-                startWidth: player.position[0] - 4,
-                endWidth: player.position[0] + 5
-            },
-            "s": {
-                startHeight: player.position[1] + 3,
-                endHeight: player.position[1] - 6,
-                startWidth: player.position[0] - 4,
-                endWidth: player.position[0] + 5
-            },
-            "e": {
-                startHeight: player.position[1] + 4,
-                endHeight: player.position[1] - 5,
-                startWidth: player.position[0] - 3,
-                endWidth: player.position[0] + 6
-            },
-            "w": {
-                startHeight: player.position[1] + 4,
-                endHeight: player.position[1] - 5,
-                startWidth: player.position[0] - 5,
-                endWidth: player.position[0] + 4
-            },
-        }
         let updatedDisplay = []
-        let position = startingPositions[direction]
+        let position = getDisplayPosition(direction)
 
         for (let i = position.startHeight; i > position.endHeight; i--) {
-            const row = grid[i].slice(position.startWidth, position.endWidth)
+            // console.log(i)
+            let row
+            try {
+                row = grid[i].slice(position.startWidth, position.endWidth)
+            } catch (err) {
+                row = new Array(displaySize).fill(createBlock())
+            }
+
             updatedDisplay = updatedDisplay.concat(row)
         }
 

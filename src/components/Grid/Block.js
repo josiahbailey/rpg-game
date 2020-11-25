@@ -5,9 +5,8 @@ import Entity from './Entity'
 const Block = ({ block }) => {
     const { id, position, entity, items, background } = block
     return (
-        <div className='Block'>
+        <div className={id === -1 ? 'Block Barrier' : 'Block'}>
             <p>{id}</p>
-            <p>{position}</p>
             <p>{entity !== null ? entity.name : ""}</p>
         </div>
     )
