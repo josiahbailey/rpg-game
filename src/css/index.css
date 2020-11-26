@@ -112,6 +112,10 @@ video {
 .Block p {
   font-size: 10px;
 }
+.Block img {
+  width: 40px;
+  height: 40px;
+}
 .Barrier {
   background-color: black;
 }

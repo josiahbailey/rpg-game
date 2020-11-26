@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import Block from './Block'
-
+import { v4 } from 'uuid'
 
 const test = [
     { id: null, items: null, entity: null, background: null },
@@ -140,7 +140,6 @@ const Grid = () => {
 
     const getDisplayPosition = (direction) => {
         const [x, y] = player.position
-        let newPosition
 
         const normalPositions = {
             "n": {
@@ -171,105 +170,6 @@ const Grid = () => {
 
         return normalPositions[direction]
 
-        // const fixedPositions = {
-        //     "n": {
-        //         startHeight: 99,
-        //         endHeight: 90,
-        //         startWidth: direction === "e" ? x - 3 : direction === "w" ? x - 5 : x - 4,
-        //         endWidth: direction === "e" ? x + 6 : direction === "w" ? x + 4 : x + 5
-        //     },
-        //     "ne": {
-        //         startHeight: 99,
-        //         endHeight: 90,
-        //         startWidth: 91,
-        //         endWidth: 100
-        //     },
-        //     "nw": {
-        //         startHeight: 99,
-        //         endHeight: 90,
-        //         startWidth: 0,
-        //         endWidth: 9
-        //     },
-        //     "s": {
-        //         startHeight: 9,
-        //         endHeight: 0,
-        //         startWidth: direction === "e" ? x - 3 : direction === "w" ? x - 5 : x - 4,
-        //         endWidth: direction === "e" ? x + 6 : direction === "w" ? x + 4 : x + 5
-        //     },
-        //     "se": {
-        //         startHeight: 9,
-        //         endHeight: 0,
-        //         startWidth: 91,
-        //         endWidth: 100
-        //     },
-        //     "sw": {
-        //         startHeight: 9,
-        //         endHeight: 0,
-        //         startWidth: 0,
-        //         endWidth: 9
-        //     },
-        //     "e": {
-        //         startHeight: direction === "n" ? y + 5 : direction === "s" ? y + 3 : y + 4,
-        //         endHeight: direction === "n" ? y - 4 : direction === "s" ? y - 6 : y - 5,
-        //         startWidth: 91,
-        //         endWidth: 100
-        //     },
-        //     "w": {
-        //         startHeight: direction === "n" ? y + 5 : direction === "s" ? y + 3 : y + 4,
-        //         endHeight: direction === "n" ? y - 4 : direction === "s" ? y - 6 : y - 5,
-        //         startWidth: 0,
-        //         endWidth: 9
-        //     },
-        // }
-
-        // if (y > 94) {
-        //     if (y === 95 && direction === "s") {
-        //         console.log("Normal Position")
-        //         newPosition = normalPositions[direction]
-        //     } else if (x > 94) {
-        //         console.log("ne")
-        //         newPosition = fixedPositions["ne"]
-        //     } else if (x < 5) {
-        //         console.log("nw")
-        //         newPosition = fixedPositions["nw"]
-        //     } else {
-        //         console.log("n")
-        //         newPosition = fixedPositions["n"]
-        //     }
-        // } else if (y < 6) {
-        //     if (y === 5 && direction === "n") {
-        //         console.log("Normal Position")
-        //         newPosition = normalPositions[direction]
-        //     } else if (x > 94) {
-        //         console.log("se")
-        //         newPosition = fixedPositions["se"]
-        //     } else if (x < 5) {
-        //         console.log("sw")
-        //         newPosition = fixedPositions["sw"]
-        //     } else {
-        //         console.log("s")
-        //         newPosition = fixedPositions["s"]
-        //     }
-        // } else if (x > 94) {
-        //     if (x === 95 && direction === "w") {
-        //         console.log("Normal Position")
-        //         newPosition = normalPositions[direction]
-        //     } else {
-        //         console.log("e")
-        //         newPosition = fixedPositions["e"]
-        //     }
-        // } else if (x < 5) {
-        //     if (x === 4 && direction === "e") {
-        //         console.log("Normal Position")
-        //         newPosition = normalPositions[direction]
-        //     } else {
-        //         console.log("w")
-        //         newPosition = fixedPositions["w"]
-        //     }
-        // } else {
-        //     console.log("Normal Position")
-        //     newPosition = normalPositions[direction]
-        // }
 
         // return newPosition
     }
@@ -283,6 +183,18 @@ const Grid = () => {
             let row
             try {
                 row = grid[i].slice(position.startWidth, position.endWidth)
+
+                if (position.startWidth < 0) {
+                    row = grid[i].slice(0, position.endWidth)
+                    for (let x = position.startWidth; x < 0; x++) {
+                        row.unshift(createBlock())
+                    }
+                } else if (position.endWidth >= width) {
+                    row = grid[i].slice(position.startWidth, width - 1)
+                    for (let x = position.endWidth; x > width - 1; x--) {
+                        row.push(createBlock())
+                    }
+                }
             } catch (err) {
                 row = new Array(displaySize).fill(createBlock())
             }
@@ -299,6 +211,8 @@ const Grid = () => {
     }, [])
 
     const changePlayerPosition = (direction) => {
+        const [y, x] = player.position
+
         const updatedPositions = {
             "n": [player.position[0], player.position[1] + 1],
             "s": [player.position[0], player.position[1] - 1],
@@ -306,8 +220,10 @@ const Grid = () => {
             "w": [player.position[0] - 1, player.position[1]]
         }
 
-        grid[player.position[0]][player.position[1]].entity = null
-        grid[updatedPositions[direction][1]][updatedPositions[direction][0]].entity = player
+        const newPosition = updatedPositions[direction]
+
+        // grid[player.position[0]][player.position[1]].entity = null
+        grid[newPosition[1]][newPosition[0]].entity = player
 
         setPlayer({
             ...player,
@@ -322,7 +238,7 @@ const Grid = () => {
         <div>
             <div className='Grid'>
                 {display.map(block => (
-                    <Block key={block.id} block={block} />
+                    <Block key={block.id === -1 ? v4() : block.id} block={block} />
                 ))}
             </div>
 
